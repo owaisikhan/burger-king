@@ -11,3 +11,4 @@ design work, and log preferences, corrections and reversals to
 - Clone fidelity beats house style: the em dashes and the original's heading weights (400, because its `font-600`/`font-700` were dead classes) are kept on purpose. Remove them only when the site is rebranded.
 - Palette exceptions: none.
 - Copy, photos, video and frames belong to the original site; replace before a public launch unless the owner confirms they own it.
+- The hero takes over scrolling like the Kodexa House coffee site: each swipe glides (1.4 to 3s, sine) to the next stop on a steady frame, and the swipe after the finished burger leaves into the menu. `createStepper` and `stepSnap` live in `src/lib/gsap.ts`; this is a deliberate change from the original site's free scrub.

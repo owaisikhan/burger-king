@@ -133,3 +133,23 @@ body::after {
     0 0 60px #c2a15a80,
     0 0 120px #c2a15a40;
 }
+
+/* A slow camera breath on the hero footage, so a resting stop never looks paused. */
+.hero-drift {
+  transform-origin: 50% 55%;
+  animation: hero-drift 9s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes hero-drift {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.05);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-drift {
+    animation: none;
+  }
+}

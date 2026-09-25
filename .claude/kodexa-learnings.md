@@ -18,6 +18,7 @@ for the rules.
 |---|---|---|---|---|---|
 | L-001 | 2026-09-24 | rule | Always create `main` and push the work there | all | ready |
 | L-002 | 2026-09-24 | gotcha | Compiled Tailwind can hide dead classes; match computed styles, not class names | type: site-clone | logged |
+| L-004 | 2026-09-25 | rule | Scroll heroes step automatically per swipe, stops on steady frames (see coffee-site-from-video L-009 to L-011) | type: 3d-website | covered |
 | L-003 | 2026-09-24 | gotcha | Headless Chromium here rejects the proxy CA; serve the target's own bundle locally for visual QA | type: site-clone | logged |
 
 ## Entries
@@ -45,3 +46,11 @@ for the rules.
 - **Scope:** type: site-clone
 - **Target in skill:** references/types/site-clone.md, "The method that worked"
 - **Status:** logged
+
+### L-004 · 2026-09-25 · strong · rule
+- **Said / saw:** "make the burger king website hero video scroll just like coffee shop one, but make it smoother to stop at every section"
+- **Context:** burger-king hero, ported from coffee-site-from-video (createStepper, stepSnap, stop frames first, nearest-loaded draw, slow drift)
+- **Lesson:** Same as coffee-site-from-video L-009 to L-011; here the owner asked for a softer stop, so glides run 1.4 to 3s with sine in-out. Stops rest on steady frames (patty, cheese, floating ingredients, finished burger) with copy blocks centred on them.
+- **Scope:** type: 3d-website
+- **Target in skill:** references/types/3d-website.md, section 4 "Scroll"
+- **Status:** covered (logged as ready in coffee-site-from-video)

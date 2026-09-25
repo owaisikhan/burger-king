@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { gsap, ScrollTrigger } from "@/lib/gsap";
+import { createStepper, gsap, ScrollTrigger, stepSnap } from "@/lib/gsap";
 
 /*
  * Pinned hero: a 600%-tall scroll scrubs a WebP frame sequence drawn to a
@@ -50,6 +50,11 @@ export function Hero() {
     const total = isMobile ? 100 : 200;
     setFrameCount(total);
     const dir = isMobile ? "smash-mobile" : "smash";
+    // Each stop rests on a steady shot: the hand with the beef ball, the seared
+    // patty, the cheese melting, the floating ingredients, the finished burger.
+    // Past the last stop a swipe leaves the hero.
+    const STOPS = [0, 33 / 99, 51 / 99, 74 / 99, 1];
+    const stopFrames = STOPS.map((p) => Math.round(p * (total - 1)));
     const src = (i: number) => `/frames/${dir}/f_${String(i + 1).padStart(3, "0")}.webp`;
     const sectionOf = (i: number) => {
       const t = i / (total - 1);
@@ -92,6 +97,14 @@ export function Hero() {
         .then((r) => r.blob())
         .then((b) => createImageBitmap(b));
 
+    const nearestLoaded = (i: number) => {
+      for (let d = 1; d < total; d++) {
+        if (frames[i - d]) return i - d;
+        if (frames[i + d]) return i + d;
+      }
+      return -1;
+    };
+
     const show = (i: number) => {
       wanted = i;
       if (i === drawn) return;
@@ -99,6 +112,9 @@ export function Hero() {
         draw(i);
         return;
       }
+      // Until the exact frame arrives, show the closest one rather than freezing.
+      const near = nearestLoaded(i);
+      if (near >= 0 && near !== drawn) draw(near);
       if (loading.has(i)) return;
       loading.add(i);
       load(i)
@@ -106,17 +122,19 @@ export function Hero() {
           frames[i] = bmp;
           loading.delete(i);
           anyLoaded = true;
-          if (wanted === i) draw(i);
+          if (wanted === i || Math.abs(i - wanted) < Math.abs(drawn - wanted)) draw(i);
         })
         .catch(() => loading.delete(i));
     };
 
-    // Sequential preloader with a fixed number of parallel workers.
+    // Stop frames load first so every glide lands on its exact frame, then the
+    // rest in order, with a fixed number of parallel workers.
+    const order = [...stopFrames, ...Array.from({ length: total }, (_, k) => k).filter((k) => !stopFrames.includes(k))];
     const workers = isMobile ? 8 : 24;
     let next = 0;
     const pump = () => {
-      const i = next++;
-      if (i >= total) return;
+      if (next >= order.length) return;
+      const i = order[next++];
       if (frames[i] || loading.has(i)) {
         pump();
         return;
@@ -128,8 +146,9 @@ export function Hero() {
           loading.delete(i);
           if (!anyLoaded) {
             anyLoaded = true;
-            draw(0);
+            draw(i);
           }
+          if (i === wanted) draw(i);
         })
         .catch(() => loading.delete(i))
         .finally(pump);
@@ -175,6 +194,7 @@ export function Hero() {
       if (el) el.style.opacity = String(v);
     };
 
+    const stepper = createStepper(STOPS);
     const ctxGsap = gsap.context(() => {
       gsap.from(".hc-stagger", {
         opacity: 0,
@@ -191,6 +211,9 @@ export function Hero() {
         scrub: 0.4,
         pin: pinRef.current,
         anticipatePin: 1,
+        // One swipe plays through to the next section, automatically.
+        snap: stepSnap(STOPS),
+        ...stepper.callbacks,
         onUpdate: (self) => {
           const t = self.progress;
           const i = Math.round(t * (total - 1));
@@ -203,15 +226,17 @@ export function Hero() {
           if (railDotRef.current) railDotRef.current.style.top = `${t * 100}%`;
           if (flashRef.current) flashRef.current.style.opacity = String(band(t, 0.87, 0.006, 0.06) * 0.8);
           if (tempRef.current) tempRef.current.textContent = `${Math.round(Math.min(1, t / 0.38) * 230)}°C`;
-          setOpacity(introRef.current, band(t, 0, 0.05, 0.05));
-          setOpacity(specsRef.current, Math.max(band(t, 0.25, 0.05, 0.06), band(t, 0.75, 0.05, 0.06)));
-          setOpacity(smashRef.current, band(t, 0.5, 0.06, 0.06));
+          // Copy blocks are centred on the stops they rest at.
+          setOpacity(introRef.current, band(t, STOPS[0], 0.05, 0.05));
+          setOpacity(specsRef.current, Math.max(band(t, STOPS[1], 0.05, 0.06), band(t, STOPS[3], 0.05, 0.06)));
+          setOpacity(smashRef.current, band(t, STOPS[2], 0.05, 0.06));
         },
       });
     }, triggerRef);
 
     return () => {
       window.removeEventListener("resize", resize);
+      stepper.kill();
       ctxGsap.revert();
       frames.forEach((f) => f?.close());
     };
@@ -253,7 +278,7 @@ export function Hero() {
   return (
     <div ref={triggerRef}>
       <div ref={pinRef} className="relative h-screen w-full overflow-hidden bg-black">
-        <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+        <canvas ref={canvasRef} className="hero-drift absolute inset-0 h-full w-full" />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black from-0% via-black/35 via-26% to-transparent to-54%" />
         <div className="pointer-events-none absolute inset-0 bg-black/20 md:hidden" />
         <div className="cam-vignette pointer-events-none absolute inset-0 z-[5]" />
