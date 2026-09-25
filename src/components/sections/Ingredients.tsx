@@ -15,7 +15,7 @@ const CARDS = [
   {
     n: "02",
     name: "BRIOCHE BUN",
-    spec: "Baked in-house daily. Enriched dough — 18% butter, six eggs per batch. Toasted 90 seconds directly on the flat-top. Never chilled.",
+    spec: "Baked in-house daily. Enriched dough: 18% butter, six eggs per batch. Toasted 90 seconds directly on the flat-top. Never chilled.",
     tag: "THE BREAD",
     img: "/ingredients/brioche.webp",
     imgFallback: "/menu/smoke.webp",
@@ -47,7 +47,7 @@ const CARDS = [
   {
     n: "06",
     name: "SMOKED BACON",
-    spec: "Applewood cold-smoked for 6 hours. Thick-cut 8mm, finished on the griddle for char. Optional — for those who want more.",
+    spec: "Applewood cold-smoked for 6 hours. Thick-cut 8mm, finished on the griddle for char. Optional, for those who want more.",
     tag: "THE SMOKE",
     img: "/ingredients/bacon.webp",
     imgFallback: "/menu/smoke.webp",

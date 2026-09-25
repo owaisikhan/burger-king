@@ -163,14 +163,14 @@ export function Reserve() {
       <span className="pointer-events-none absolute right-6 bottom-6 h-14 w-14 border-r border-b border-accent/30 md:right-14 md:bottom-14" />
       <div className="mx-auto max-w-[1100px]">
         <div ref={headRef} className="mb-16 text-center">
-          <p className="font-display text-[11px] tracking-[0.45em] text-accent">BOOK YOUR TABLE · SMASH THE SEAR</p>
+          <p className="font-display text-[11px] tracking-[0.45em] text-accent">BOOK YOUR TABLE · SEARLINE</p>
           <h2 className="mt-5 font-display leading-none tracking-tight text-text uppercase text-[clamp(3rem,9vw,8rem)]">
             RESERVE
             <br />
             <span className="text-accent">YOUR SMASH</span>
           </h2>
           <p className="mx-auto mt-6 max-w-sm text-sm leading-relaxed text-muted">
-            Open daily 12:00 – 22:00 · Walk-ins welcome, reservation preferred.
+            Open daily 12:00 to 22:00 · Walk-ins welcome, reservation preferred.
           </p>
           <div className="mx-auto mt-8 h-px w-20 bg-accent/40" />
         </div>
@@ -182,7 +182,7 @@ export function Reserve() {
             </div>
             <h3 className="font-display text-2xl tracking-tight text-text md:text-4xl">RESERVATION CONFIRMED</h3>
             <p className="max-w-sm text-sm leading-relaxed text-muted">
-              We look forward to seeing you — <span className="text-text">{name}</span>.
+              We look forward to seeing you, <span className="text-text">{name}</span>.
               <br />
               <span className="text-accent">
                 {formatDate(date)} · {time} · {guests} {guests === 1 ? "guest" : "guests"}

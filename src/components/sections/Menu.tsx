@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "@/lib/gsap";
 import { MENU, SELECT_BUILD_EVENT, type MenuItem } from "@/lib/content";
+import { cart, flyToCart } from "@/lib/cart";
 
 export function Menu() {
   const ref = useRef<HTMLElement>(null);
@@ -67,7 +68,7 @@ export function Menu() {
   };
 
   return (
-    <section ref={ref} className="bg-bg px-6 py-28 md:px-12">
+    <section ref={ref} id="menu" className="scroll-mt-16 bg-bg px-6 py-28 md:px-12">
       <div className="mx-auto max-w-[1300px]">
         <div className="menu-head mb-16 flex items-end justify-between border-b border-stroke pb-8">
           <div>
@@ -113,15 +114,27 @@ export function Menu() {
                     </span>
                   ))}
                 </div>
-                <button
-                  onClick={(e) => {
-                    const img = e.currentTarget.closest(".menu-card")?.querySelector("img");
-                    if (img) addToOrder(item, img);
-                  }}
-                  className="mt-6 w-full rounded-xl border border-accent/30 bg-accent/10 py-3 font-display text-xs tracking-[0.3em] text-accent transition-all duration-300 hover:bg-accent hover:text-bg active:scale-95"
-                >
-                  + ADD TO ORDER
-                </button>
+                <div className="mt-6 flex gap-2">
+                  <button
+                    onClick={(e) => {
+                      const img = e.currentTarget.closest(".menu-card")?.querySelector("img");
+                      cart.add({ key: `${item.id}:S:`, name: item.name, detail: "Single smash", img: item.img, price: item.price });
+                      if (img) flyToCart(img, item.img);
+                    }}
+                    className="min-h-11 flex-1 rounded-xl bg-accent py-3 font-display text-xs tracking-[0.25em] text-bg transition-all duration-300 hover:brightness-110 active:scale-95"
+                  >
+                    + ADD TO CART
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      const img = e.currentTarget.closest(".menu-card")?.querySelector("img");
+                      if (img) addToOrder(item, img);
+                    }}
+                    className="min-h-11 rounded-xl border border-accent/30 bg-accent/10 px-4 py-3 font-display text-xs tracking-[0.2em] text-accent transition-all duration-300 hover:bg-accent hover:text-bg active:scale-95"
+                  >
+                    CUSTOMIZE
+                  </button>
+                </div>
               </div>
             </div>
           ))}

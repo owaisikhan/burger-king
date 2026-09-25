@@ -46,7 +46,7 @@ export function Overview() {
       <div className="pointer-events-none absolute bottom-0 left-0 h-[400px] w-[400px] -translate-x-1/3 translate-y-1/4 rounded-full bg-accent/4 blur-[120px]" />
       <div className="mx-auto grid max-w-[1400px] items-center gap-16 md:grid-cols-2">
         <div ref={copyRef} className="order-1 md:order-1">
-          <p className="font-display text-[11px] tracking-[0.4em] text-muted">03 // OVERVIEW — THE SMASH SEAR</p>
+          <p className="font-display text-[11px] tracking-[0.4em] text-muted">03 // OVERVIEW · THE SMASH SEAR</p>
           <h1 className="mt-4 font-display text-5xl leading-none tracking-tight text-text md:text-7xl lg:text-8xl">
             SMASH
             <br />
@@ -95,7 +95,7 @@ export function Overview() {
               </div>
             </div>
             <div className="absolute -bottom-5 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-full border border-stroke bg-surface/90 px-5 py-2 backdrop-blur-md">
-              <span className="font-display text-[10px] tracking-[0.3em] text-accent">GRIDDLE-FORGED — SINCE 2024</span>
+              <span className="font-display text-[10px] tracking-[0.3em] text-accent">GRIDDLE-FORGED · SINCE 2024</span>
             </div>
           </div>
         </div>

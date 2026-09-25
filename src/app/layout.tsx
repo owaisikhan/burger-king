@@ -15,7 +15,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "SMASH — THE SEAR",
+  title: "SEARLINE | Smash burgers, seared to order",
   icons: { icon: "/favicon.svg" },
 };
 

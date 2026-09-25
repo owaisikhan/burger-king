@@ -23,7 +23,7 @@ export function Craft() {
           </h2>
         </div>
         <p className="hidden md:block text-muted text-sm max-w-xs text-right leading-relaxed">
-          Ten hand-selected components. Each sourced, cured, or griddle-charred to its peak — then smashed into one
+          Ten hand-selected components. Each sourced, cured, or griddle-charred to its peak, then smashed into one
           burger.
         </p>
       </div>

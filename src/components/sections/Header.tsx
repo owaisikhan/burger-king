@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { CartButton } from "@/components/sections/CartDrawer";
 
 const NAV = [
   "01. Line-Up",
@@ -38,7 +39,7 @@ export function Header() {
     >
       <nav className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-4 md:px-10">
         <div className="flex flex-col leading-none">
-          <span className="font-display text-base tracking-[0.25em] text-text">SMASH</span>
+          <span className="font-display text-base tracking-[0.25em] text-text">SEARLINE</span>
           <span className="font-display text-[9px] tracking-[0.4em] text-muted">GRIDDLE-FORGED</span>
         </div>
         <ul className="hidden items-center gap-7 lg:flex">
@@ -55,21 +56,17 @@ export function Header() {
             </li>
           ))}
         </ul>
-        <button
-          onClick={() => setOpen((v) => !v)}
-          className="flex flex-col gap-[5px] p-2 lg:hidden"
-          aria-label="Menu"
-        >
-          <span className={`block h-px w-5 bg-text transition-all duration-300 ${open ? "translate-y-[7px] rotate-45" : ""}`} />
-          <span className={`block h-px w-5 bg-text transition-all duration-300 ${open ? "opacity-0" : ""}`} />
-          <span className={`block h-px w-5 bg-text transition-all duration-300 ${open ? "-translate-y-[7px] -rotate-45" : ""}`} />
-        </button>
-        <div className="hidden items-center gap-2 font-display text-[11px] tracking-[0.25em] text-muted lg:flex">
-          MENU
-          <span className="flex flex-col gap-[3px]">
-            <span className="h-px w-4 bg-muted" />
-            <span className="h-px w-4 bg-muted" />
-          </span>
+        <div className="flex items-center gap-2">
+          <CartButton />
+          <button
+            onClick={() => setOpen((v) => !v)}
+            className="flex flex-col gap-[5px] p-2 lg:hidden"
+            aria-label="Menu"
+          >
+            <span className={`block h-px w-5 bg-text transition-all duration-300 ${open ? "translate-y-[7px] rotate-45" : ""}`} />
+            <span className={`block h-px w-5 bg-text transition-all duration-300 ${open ? "opacity-0" : ""}`} />
+            <span className={`block h-px w-5 bg-text transition-all duration-300 ${open ? "-translate-y-[7px] -rotate-45" : ""}`} />
+          </button>
         </div>
       </nav>
       <div

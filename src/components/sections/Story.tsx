@@ -20,13 +20,13 @@ const CHAPTERS = [
     img: "/story/story-wichita.jpg",
     era: "1921 · WICHITA, KANSAS",
     title: "Born as an icon",
-    desc: "Lunch counters across the Midwest made it fast, cheap and everywhere. A nickel a patty — the hamburger became a true American icon.",
+    desc: "Lunch counters across the Midwest made it fast, cheap and everywhere. A nickel a patty, and the hamburger became a true American icon.",
   },
   {
     img: "/story/story-today.jpg",
     era: "TODAY · EST. 2026",
     title: "Still built by hand",
-    desc: "A century on, nothing's been rushed away. Fresh-ground beef, bare steel, smashed thin by hand — SMASH carries the same patty back to its roots.",
+    desc: "A century on, nothing's been rushed away. Fresh-ground beef, bare steel, smashed thin by hand. SEARLINE carries the same patty back to its roots.",
   },
 ];
 
@@ -79,7 +79,7 @@ export function Story() {
               </div>
             </div>
             <p className="mt-2 max-w-[48ch] text-sm leading-relaxed text-muted">
-              Born in Hamburg, 1880. A German steak becomes an American icon, then a modern craft — one patty, perfected
+              Born in Hamburg, 1880. A German steak becomes an American icon, then a modern craft: one patty, perfected
               across two centuries.
             </p>
           </div>

@@ -327,7 +327,7 @@ export function Hero() {
                 00:00:00:00
               </span>
             </span>
-            <span className="hidden md:inline">SMASH // SINGLE PATTY SEAR</span>
+            <span className="hidden md:inline">SEARLINE // SINGLE PATTY SEAR</span>
             <span className="tabular text-muted/80">4K · 24FPS · F2.8 · 1/50</span>
           </div>
 
@@ -366,7 +366,7 @@ export function Hero() {
           </div>
 
           <div className="absolute right-2.5 top-1/2 hidden -translate-y-1/2 [writing-mode:vertical-rl] text-[9px] tracking-[0.45em] text-muted/60 md:block">
-            SMASH CUT No.01 — FRESH-GROUND SEAR
+            SEARLINE CUT No.01 · FRESH-GROUND SEAR
           </div>
           <div className="absolute left-2.5 top-1/2 hidden -translate-y-1/2 rotate-180 [writing-mode:vertical-rl] text-[9px] tracking-[0.45em] text-muted/50 md:block">
             SCROLL TO EXPLORE
@@ -438,7 +438,7 @@ export function Hero() {
               GRIDDLE-FORGED // CUT No.01
             </p>
             <h1 className="hc-stagger font-display text-5xl leading-[0.95] tracking-tight text-text md:text-8xl">
-              SMASH
+              SEARLINE
               <br />
               <span className="text-accent">{"// "}</span>THE SEAR
             </h1>
@@ -490,7 +490,7 @@ export function Hero() {
           </h2>
           <p className="mt-6 max-w-xs text-xs leading-relaxed text-muted">
             One patty, built to perfection. Brioche, shredded lettuce, dill pickles, melted American, single smash and
-            the house sauce — smashed together.
+            the house sauce, smashed together.
           </p>
           <p className="mt-6 font-display text-[11px] tracking-[0.3em] text-muted">SEAR PROFILE:</p>
           <p className="font-display text-2xl tracking-[0.2em] text-accent">MAILLARD</p>

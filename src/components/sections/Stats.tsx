@@ -14,7 +14,7 @@ const STATS = [
     end: 8,
     suffix: "S",
     label: "SECONDS\nSMASH CONTACT",
-    sub: "Full-force smash the instant it hits the flat-top — crust locks in before the juice escapes.",
+    sub: "Full-force smash the instant it hits the flat-top, so the crust locks in before the juice escapes.",
   },
   {
     end: 230,
@@ -26,7 +26,7 @@ const STATS = [
     end: 1,
     suffix: "",
     label: "PATTY\nZERO COMPROMISE",
-    sub: "No stack, no filler — every ingredient earns its place on a single perfect patty.",
+    sub: "No stack, no filler: every ingredient earns its place on a single perfect patty.",
   },
 ];
 

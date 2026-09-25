@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { gsap } from "@/lib/gsap";
+import { cart, flyToCart } from "@/lib/cart";
 import { SELECT_BUILD_EVENT, type MenuItem } from "@/lib/content";
 
 const BASE_PRICE = 12;
@@ -408,8 +409,18 @@ export function Configurator() {
                   ${total}
                 </p>
               </div>
-              <button className="mt-4 w-full rounded-xl bg-accent py-4 font-display text-sm tracking-[0.3em] text-bg transition-all duration-300 hover:brightness-110 active:scale-[0.98] md:mt-5 md:py-5">
-                ORDER YOUR SMASH
+              <button
+                onClick={() => {
+                  const name = build ? build.name : "CUSTOM SMASH";
+                  const picked = [...toppings].map((id) => TOPPINGS.find((t) => t.id === id)!.label);
+                  const detail = [current.name.toLowerCase().replace(/^./, (c) => c.toUpperCase()), ...picked.map((l) => l.toLowerCase())].join(", ");
+                  const img = build ? build.img : "/menu/gold-pedestal.webp";
+                  cart.add({ key: `${name}:${size}:${[...toppings].sort().join("+")}`, name, detail, img, price: total });
+                  if (previewImgRef.current) flyToCart(previewImgRef.current, img);
+                }}
+                className="mt-4 w-full rounded-xl bg-accent py-4 font-display text-sm tracking-[0.3em] text-bg transition-all duration-300 hover:brightness-110 active:scale-[0.98] md:mt-5 md:py-5"
+              >
+                ADD TO CART · ${total}
               </button>
             </div>
           </div>

@@ -16,7 +16,7 @@ const STAGES = [
   },
   {
     title: "PEAK\nSMASH",
-    body: "230°C. Maximum heat meeting maximum surface area. Full-force press, crust to the edges, no pink center — that's the whole point.",
+    body: "230°C. Maximum heat meeting maximum surface area. Full-force press, crust to the edges, no pink center. That's the whole point.",
     tempLabel: "MAILLARD COMPLETE",
   },
 ];

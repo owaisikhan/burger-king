@@ -10,6 +10,7 @@ import { Ingredients } from "@/components/sections/Ingredients";
 import { Story } from "@/components/sections/Story";
 import { Reserve } from "@/components/sections/Reserve";
 import { Footer } from "@/components/sections/Footer";
+import { CartDrawer } from "@/components/sections/CartDrawer";
 
 export default function Home() {
   return (
@@ -26,6 +27,7 @@ export default function Home() {
       <Story />
       <Reserve />
       <Footer />
+      <CartDrawer />
     </main>
   );
 }
