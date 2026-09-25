@@ -9,7 +9,7 @@ design work, and log preferences, corrections and reversals to
 - 1:1 clone of https://smash-burger-hq.vercel.app/ (research in `docs/research/smash/NOTES.md`).
 - Push finished work to `main` (the owner's standing rule).
 - Rebranded 2026-09-25 from SMASH to SEARLINE (brand name only; "smash" stays as the burger style). Em dashes were removed with the rebrand; keep copy dash-free. Heading weights stay 400 as in the original design.
-- Cart: `src/lib/cart.ts` (store in localStorage, `flyToCart`), `CartDrawer.tsx` (drawer + header button), checkout goes to WhatsApp via `src/lib/site.ts` (number is a PLACEHOLDER).
+- Cart: `src/lib/cart.ts` (store in localStorage, `flyToCart`), `CartDrawer.tsx` (drawer + header button), checkout goes to WhatsApp via `src/lib/site.ts`; for the demo it is Kodexa's own number (0339 0391420), to be swapped for a real restaurant's.
 - Palette exceptions: none.
 - The owner confirmed (2026-09-25) that Kodexa made smash-burger-hq, so its copy, photos, video and frames are Kodexa's own and can be used in Kodexa marketing.
 - The hero scrolls freely and continuously (scrub 0.8), then settles on a steady video frame when it comes to rest (`createSettle` in `src/lib/gsap.ts`): past a small nudge it carries on to the next stop in the direction of travel. Phones blend between their 100 frames with two stacked canvases (CSS opacity on the upper one); desktops play all 200 frames on one canvas. The owner rejected the swipe takeover as not smooth on the real site.

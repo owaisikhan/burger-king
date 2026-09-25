@@ -1,8 +1,9 @@
 // Identity as data. PLACEHOLDER values are waiting on the restaurant's real details.
 export const site = {
   name: "SEARLINE",
-  // PLACEHOLDER: the restaurant's WhatsApp number, international format, digits only.
-  whatsapp: "923000000000",
+  // Kodexa's WhatsApp (0339 0391420) for the demo, so checkout reaches a real
+  // inbox. Swap in the restaurant's own number, international format, digits only.
+  whatsapp: "923390391420",
   currency: "$",
 };
 
