@@ -19,6 +19,7 @@ for the rules.
 | L-001 | 2026-09-24 | rule | Always create `main` and push the work there | all | ready |
 | L-002 | 2026-09-24 | gotcha | Compiled Tailwind can hide dead classes; match computed styles, not class names | type: site-clone | logged |
 | L-004 | 2026-09-25 | rule | Scroll heroes step automatically per swipe, stops on steady frames (see coffee-site-from-video L-009 to L-011) | type: 3d-website | covered |
+| L-005 | 2026-09-25 | reversal | Free continuous scrub that settles on a steady frame beats the swipe takeover | type: 3d-website | ready |
 | L-003 | 2026-09-24 | gotcha | Headless Chromium here rejects the proxy CA; serve the target's own bundle locally for visual QA | type: site-clone | logged |
 
 ## Entries
@@ -53,4 +54,12 @@ for the rules.
 - **Lesson:** Same as coffee-site-from-video L-009 to L-011; here the owner asked for a softer stop, so glides run 1.4 to 3s with sine in-out. Stops rest on steady frames (patty, cheese, floating ingredients, finished burger) with copy blocks centred on them.
 - **Scope:** type: 3d-website
 - **Target in skill:** references/types/3d-website.md, section 4 "Scroll"
-- **Status:** covered (logged as ready in coffee-site-from-video)
+- **Status:** superseded by L-005
+
+### L-005 · 2026-09-25 · strong · reversal
+- **Said / saw:** "i dont like the scroll on real site, does not look smooth, just make it continuous but smooth and at each section, it should snap at a proper video snapshot, not something in between"
+- **Context:** burger-king hero, after the swipe takeover (L-004) was tried on a real phone
+- **Lesson:** Do not take over scrolling. Let the reader scroll freely with a soft scrub (0.8), and when the page comes to rest inside the section, with no finger down, glide (0.5 to 1.4s, sine) to a stop on a steady frame: past a nudge of about 150px carry on in the direction of travel, otherwise return. Write the settle yourself (scroll idle timer plus touch tracking); GSAP's built-in snap did not fire reliably here. Listen for touchend on the touch target as well as window, because an element removed mid-swipe (the SCROLL NOW gate) swallows it. On phones, blend between frames with two stacked canvases and CSS opacity (one redraw per frame change); two drawImage calls per update tripled the cost. Measure with a 4x CPU throttle before and after.
+- **Scope:** type: 3d-website
+- **Target in skill:** references/types/3d-website.md, section 4 "Scroll" (replaces the takeover advice)
+- **Status:** ready

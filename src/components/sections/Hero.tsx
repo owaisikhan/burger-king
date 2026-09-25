@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { createStepper, gsap, ScrollTrigger, stepSnap } from "@/lib/gsap";
+import { createSettle, gsap, ScrollTrigger } from "@/lib/gsap";
 
 /*
  * Pinned hero: a 600%-tall scroll scrubs a WebP frame sequence drawn to a
@@ -29,6 +29,7 @@ export function Hero() {
   const triggerRef = useRef<HTMLDivElement>(null);
   const pinRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasBRef = useRef<HTMLCanvasElement>(null);
   const introRef = useRef<HTMLDivElement>(null);
   const specsRef = useRef<HTMLDivElement>(null);
   const smashRef = useRef<HTMLDivElement>(null);
@@ -52,7 +53,7 @@ export function Hero() {
     const dir = isMobile ? "smash-mobile" : "smash";
     // Each stop rests on a steady shot: the hand with the beef ball, the seared
     // patty, the cheese melting, the floating ingredients, the finished burger.
-    // Past the last stop a swipe leaves the hero.
+    // When scrolling stops inside the hero, it settles on the nearest one.
     const STOPS = [0, 33 / 99, 51 / 99, 74 / 99, 1];
     const stopFrames = STOPS.map((p) => Math.round(p * (total - 1)));
     const src = (i: number) => `/frames/${dir}/f_${String(i + 1).padStart(3, "0")}.webp`;
@@ -69,65 +70,89 @@ export function Hero() {
       return "03 · THE SMASH";
     };
 
-    const canvas = canvasRef.current!;
-    const ctx = canvas.getContext("2d")!;
-    ctx.imageSmoothingQuality = "medium";
+    // Two stacked canvases: the lower one holds the current frame, the upper one
+    // the next frame, faded in with CSS opacity by how far between them the
+    // scroll is. When the video moves on a frame the canvases swap roles, so
+    // only one image is redrawn per frame change and the blend itself is a
+    // cheap compositor opacity change.
+    const layers = [canvasRef.current!, canvasBRef.current!].map((c) => ({ c, ctx: c.getContext("2d")!, frame: -1 }));
+    let lowerIdx = 0;
 
     const frames: (ImageBitmap | null)[] = Array(total).fill(null);
     const loading = new Set<number>();
-    let drawn = -1;
-    let wanted = -1;
-    let anyLoaded = false;
+    // Fractional frame position from the scroll, e.g. 33.4 = frame 33 with 40% of 34.
+    let pos = 0;
+    let raf = 0;
+    let cssW = 0;
+    let cssH = 0;
 
-    const draw = (i: number) => {
-      const img = frames[i];
-      if (!img) return;
-      drawn = i;
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      const s = Math.max(w / img.width, h / img.height);
+    const paint = (layer: (typeof layers)[number], img: CanvasImageSource & { width: number; height: number }) => {
+      const s = Math.max(cssW / img.width, cssH / img.height);
       const dw = img.width * s;
       const dh = img.height * s;
-      ctx.clearRect(0, 0, w, h);
-      ctx.drawImage(img, w * 0.5 - dw / 2, (h - dh) / 2, dw, dh);
+      layer.ctx.drawImage(img, (cssW - dw) / 2, (cssH - dh) / 2, dw, dh);
+    };
+    const put = (layer: (typeof layers)[number], i: number) => {
+      if (layer.frame === i || !frames[i]) return;
+      paint(layer, frames[i]!);
+      layer.frame = i;
     };
 
-    const load = (i: number) =>
-      fetch(src(i))
-        .then((r) => r.blob())
-        .then((b) => createImageBitmap(b));
-
     const nearestLoaded = (i: number) => {
-      for (let d = 1; d < total; d++) {
+      for (let d = 0; d < total; d++) {
         if (frames[i - d]) return i - d;
         if (frames[i + d]) return i + d;
       }
       return -1;
     };
 
-    const show = (i: number) => {
-      wanted = i;
-      if (i === drawn) return;
-      if (frames[i]) {
-        draw(i);
-        return;
+    // At most one update per screen refresh.
+    const render = () => {
+      raf = 0;
+      const i0 = Math.floor(pos);
+      const i1 = Math.min(total - 1, i0 + 1);
+      let frac = pos - i0;
+      let base = i0;
+      if (!frames[i0]) {
+        // Not arrived yet: show the closest frame that has, without a blend.
+        base = nearestLoaded(Math.round(pos));
+        if (base < 0) return;
+        frac = 0;
       }
-      // Until the exact frame arrives, show the closest one rather than freezing.
-      const near = nearestLoaded(i);
-      if (near >= 0 && near !== drawn) draw(near);
-      if (loading.has(i)) return;
-      loading.add(i);
-      load(i)
-        .then((bmp) => {
-          frames[i] = bmp;
-          loading.delete(i);
-          anyLoaded = true;
-          if (wanted === i || Math.abs(i - wanted) < Math.abs(drawn - wanted)) draw(i);
-        })
-        .catch(() => loading.delete(i));
+      // Reuse whichever canvas already holds the frame we need underneath.
+      const lowerNow = layers[lowerIdx];
+      const upperNow = layers[1 - lowerIdx];
+      if (lowerNow.frame !== base && (upperNow.frame === base || lowerNow.frame === i1)) lowerIdx = 1 - lowerIdx;
+      const lower = layers[lowerIdx];
+      const upper = layers[1 - lowerIdx];
+      put(lower, base);
+      // Phones have 100 frames, so they blend between them; desktops play all
+      // 200 and skip the second layer, which keeps large-screen compositing cheap.
+      const blend = isMobile && base === i0 && i1 !== i0 && frames[i1] && frac > 0.02 ? frac : 0;
+      if (blend) put(upper, i1);
+      lower.c.style.zIndex = "0";
+      upper.c.style.zIndex = "1";
+      lower.c.style.opacity = "1";
+      upper.c.style.opacity = blend ? blend.toFixed(3) : "0";
+      const shown = String(blend > 0.5 ? i1 : base);
+      layers.forEach((l) => (l.c.dataset.frame = shown));
+    };
+    const requestRender = () => {
+      if (!raf) raf = requestAnimationFrame(render);
     };
 
-    // Stop frames load first so every glide lands on its exact frame, then the
+    const load = (i: number) =>
+      fetch(src(i))
+        .then((r) => r.blob())
+        .then((b) => createImageBitmap(b))
+        .then((bmp) => {
+          frames[i] = bmp;
+          requestRender();
+        })
+        .catch(() => {})
+        .finally(() => loading.delete(i));
+
+    // Stop frames load first so every snap lands on its exact frame, then the
     // rest in order, with a fixed number of parallel workers.
     const order = [...stopFrames, ...Array.from({ length: total }, (_, k) => k).filter((k) => !stopFrames.includes(k))];
     const workers = isMobile ? 8 : 24;
@@ -140,61 +165,57 @@ export function Hero() {
         return;
       }
       loading.add(i);
-      load(i)
-        .then((bmp) => {
-          frames[i] = bmp;
-          loading.delete(i);
-          if (!anyLoaded) {
-            anyLoaded = true;
-            draw(i);
-          }
-          if (i === wanted) draw(i);
-        })
-        .catch(() => loading.delete(i))
-        .finally(pump);
+      load(i).finally(pump);
     };
     for (let k = 0; k < Math.min(workers, total); k++) pump();
 
-    // A plain <img> for frame 0 paints before the bitmap pipeline is ready.
-    let poster: HTMLImageElement | null = null;
-    const drawPoster = () => {
-      if (!poster || anyLoaded) return;
+    // A plain <img> of frame 0 paints before the bitmap pipeline is ready.
+    const poster = new Image();
+    poster.onload = () => {
+      if (layers[0].frame < 0) paint(layers[0], poster);
+    };
+    poster.src = src(0);
+
+    // Size the canvas to the screen. Phones fire resize whenever the address
+    // bar slides; reallocating the canvas then is costly and pointless, so only
+    // a width change or a large height change resizes it.
+    const resize = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
-      const s = Math.max(w / poster.width, h / poster.height);
-      const dw = poster.width * s;
-      const dh = poster.height * s;
-      ctx.clearRect(0, 0, w, h);
-      ctx.drawImage(poster, (w - dw) / 2, (h - dh) / 2, dw, dh);
-    };
-    const posterImg = new Image();
-    posterImg.onload = () => {
-      poster = posterImg;
-      drawPoster();
-    };
-    posterImg.src = src(0);
-
-    const resize = () => {
+      if (w === cssW && Math.abs(h - cssH) < 160) return;
       const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
-      canvas.style.width = `${window.innerWidth}px`;
-      canvas.style.height = `${window.innerHeight}px`;
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.imageSmoothingQuality = "medium";
-      const current = drawn < 0 ? 0 : drawn;
-      drawn = -1;
-      show(current);
-      drawPoster();
+      cssW = w;
+      cssH = isMobile ? Math.max(h, window.screen.height) : h;
+      for (const l of layers) {
+        l.c.width = Math.round(cssW * dpr);
+        l.c.height = Math.round(cssH * dpr);
+        l.c.style.width = `${cssW}px`;
+        l.c.style.height = `${cssH}px`;
+        l.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        l.ctx.imageSmoothingQuality = "medium";
+        l.frame = -1;
+      }
+      if (frames.some(Boolean)) requestRender();
+      else if (poster.complete && poster.naturalWidth) paint(layers[0], poster);
     };
     resize();
     window.addEventListener("resize", resize);
+
+    // Markers move with transforms, never left/top, so scrubbing causes no layout.
+    let barW = 0;
+    let railH = 0;
+    const measure = () => {
+      barW = barRef.current?.offsetWidth ?? 0;
+      railH = railDotRef.current?.parentElement?.offsetHeight ?? 0;
+    };
+    measure();
+    window.addEventListener("resize", measure);
 
     const setOpacity = (el: HTMLElement | null, v: number) => {
       if (el) el.style.opacity = String(v);
     };
 
-    const stepper = createStepper(STOPS);
+    const settle = createSettle(STOPS);
     const ctxGsap = gsap.context(() => {
       gsap.from(".hc-stagger", {
         opacity: 0,
@@ -204,26 +225,25 @@ export function Hero() {
         delay: 0.2,
         ease: "power3.out",
       });
-      ScrollTrigger.create({
+      const heroTrigger = ScrollTrigger.create({
         trigger: triggerRef.current,
         start: "top top",
         end: "+=600%",
-        scrub: 0.4,
+        // A softer scrub: the video eases after the finger instead of jumping.
+        scrub: 0.8,
         pin: pinRef.current,
         anticipatePin: 1,
-        // One swipe plays through to the next section, automatically.
-        snap: stepSnap(STOPS),
-        ...stepper.callbacks,
         onUpdate: (self) => {
           const t = self.progress;
-          const i = Math.round(t * (total - 1));
-          show(i);
+          pos = t * (total - 1);
+          requestRender();
+          const i = Math.round(pos);
           if (frameRef.current) frameRef.current.textContent = String(i).padStart(3, "0");
           if (phaseRef.current) phaseRef.current.textContent = phaseOf(i);
           if (sectionRef.current) sectionRef.current.textContent = sectionOf(i);
           if (barRef.current) barRef.current.style.transform = `scaleX(${t})`;
-          if (markerRef.current) markerRef.current.style.left = `${t * 100}%`;
-          if (railDotRef.current) railDotRef.current.style.top = `${t * 100}%`;
+          if (markerRef.current) markerRef.current.style.transform = `translateX(${t * barW}px)`;
+          if (railDotRef.current) railDotRef.current.style.transform = `translateY(${t * railH}px)`;
           if (flashRef.current) flashRef.current.style.opacity = String(band(t, 0.87, 0.006, 0.06) * 0.8);
           if (tempRef.current) tempRef.current.textContent = `${Math.round(Math.min(1, t / 0.38) * 230)}°C`;
           // Copy blocks are centred on the stops they rest at.
@@ -232,11 +252,15 @@ export function Hero() {
           setOpacity(smashRef.current, band(t, STOPS[2], 0.05, 0.06));
         },
       });
+      // Free, continuous scrolling; when it comes to rest, settle on the nearest stop.
+      settle.attach(heroTrigger);
     }, triggerRef);
 
     return () => {
       window.removeEventListener("resize", resize);
-      stepper.kill();
+      window.removeEventListener("resize", measure);
+      if (raf) cancelAnimationFrame(raf);
+      settle.kill();
       ctxGsap.revert();
       frames.forEach((f) => f?.close());
     };
@@ -278,14 +302,17 @@ export function Hero() {
   return (
     <div ref={triggerRef}>
       <div ref={pinRef} className="relative h-screen w-full overflow-hidden bg-black">
-        <canvas ref={canvasRef} className="hero-drift absolute inset-0 h-full w-full" />
+        <div className="hero-drift absolute inset-0" aria-hidden="true">
+          <canvas ref={canvasRef} className="absolute left-0 top-0 will-change-[opacity]" />
+          <canvas ref={canvasBRef} className="absolute left-0 top-0 opacity-0 will-change-[opacity]" />
+        </div>
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-black from-0% via-black/35 via-26% to-transparent to-54%" />
         <div className="pointer-events-none absolute inset-0 bg-black/20 md:hidden" />
         <div className="cam-vignette pointer-events-none absolute inset-0 z-[5]" />
         <div className="cam-scanlines pointer-events-none absolute inset-0 z-[5] opacity-60" />
         <div
           ref={flashRef}
-          className="pointer-events-none absolute inset-0 z-[6] opacity-0 mix-blend-screen bg-[radial-gradient(circle_at_66%_50%,rgba(235,200,140,0.9),rgba(194,161,90,0.35)_30%,transparent_60%)]"
+          className="pointer-events-none absolute inset-0 z-[6] opacity-0 bg-[radial-gradient(circle_at_66%_50%,rgba(235,200,140,0.55),rgba(194,161,90,0.2)_30%,transparent_60%)]"
         />
 
         <div className="pointer-events-none absolute inset-0 z-10 font-display text-muted">
@@ -470,7 +497,7 @@ export function Hero() {
         </div>
 
         {gate !== "gone" && (
-          <div className="absolute inset-0 z-40">
+          <div className="pointer-events-none absolute inset-0 z-40">
             <div
               className={`pointer-events-none absolute inset-0 flex flex-col items-center justify-center transition-all duration-700 ease-out ${
                 gateVisible ? "translate-y-0 opacity-100" : "translate-y-3 opacity-0"
